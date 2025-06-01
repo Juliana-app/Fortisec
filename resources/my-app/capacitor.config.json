@@ -1,0 +1,16 @@
+{
+  "appId": "com.example.app",
+  "appName": "Fortisec",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  },
+  "server": {
+    "url": "https://b373-152-203-163-229.ngrok-free.app",
+    "cleartext": true
+  }
+}
+
+
