@@ -1,38 +1,30 @@
-# Imagen base con PHP, Apache y extensiones necesarias
 FROM php:8.2-apache
 
-# Instala extensiones necesarias
+# Instala dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip git curl libpng-dev \
+    git zip unzip libzip-dev libpq-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo pdo_mysql zip
-
-# Habilita mod_rewrite de Apache (importante para Laravel)
-RUN a2enmod rewrite
-
-# Establece el directorio de trabajo
-WORKDIR /var/www/html
-
-# Copia los archivos del proyecto
-COPY . .
-
-# Copia .env si no está en .gitignore
-# COPY .env .env
-
-# Asigna permisos adecuados
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache
 
 # Instala Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copia el código del proyecto
+COPY . /var/www/html
+
+# Establece el directorio de trabajo
+WORKDIR /var/www/html
+
+# Permisos
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
 # Instala dependencias de Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
-# Genera cachés necesarios
-RUN php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan view:clear && \
-    php artisan route:clear
+# Habilita mod_rewrite
+RUN a2enmod rewrite
 
-# Asegura que public sea la raíz en Apache
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+# Configura Apache
+COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
