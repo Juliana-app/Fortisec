@@ -3,14 +3,7 @@ services:
     name: laravel-app
     env: docker
     plan: free
+    buildCommand: ""
+    startCommand: apache2-foreground
     dockerfilePath: ./Dockerfile
-    region: oregon
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_KEY
-        generateValue: true
-      - key: APP_DEBUG
-        value: true
-      - key: APP_URL
-        value: https://tu-app.onrender.com
+    autoDeploy: true
